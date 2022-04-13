@@ -1,2 +1,0 @@
-# FLowDapp
-A Learning Material
