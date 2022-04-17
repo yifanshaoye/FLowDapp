@@ -1,19 +1,18 @@
+
 import React from 'react';
 import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import Navbar from './components/Navbar'
+import Providers from './providers/Providers.comp';
+import Routes from './components/Routes.comp'
+import { ROUTES } from './config/routes.config';
 
-import "./config"
+import './index.css';
+import './components/Atoms.css'
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Providers>
+    <Navbar />
+    <Routes routes={ROUTES} />
+  </Providers>,
   document.getElementById('root')
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
