@@ -37,6 +37,7 @@ export default function useUserDappies(user, collection, getFUSDBalance) {
       }
     }
     fetchUserDappies()
+    // eslint-disable-next-line
   }, [])
 
   const mintDappy = async (templateID, amount) => {

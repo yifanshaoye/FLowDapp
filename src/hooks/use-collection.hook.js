@@ -23,6 +23,7 @@ export default function useCollection(user) {
       }
     };
     checkCollection();
+    // eslint-disable-next-line
   }, [])
 
   const createCollection = async () => {
