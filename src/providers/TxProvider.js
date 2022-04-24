@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 
 import TxDetails from '../components/TxDetails'
 import Spinner from '../components/Spinner'
-import { tx } from '@onflow/fcl'
+import { send, getTransactionStatus, decode, tx } from '@onflow/fcl'
 
 const txContext = React.createContext()
 
@@ -24,8 +24,37 @@ export default function TxProvider({ children }) {
   }
 
   const getLocalTxs = async () => {
-    setTxs([])
+    const txString = window.localStorage.getItem('txs')
+
+    if (!txString || txString.length === 0) {
+      setLoading(false)
+      return
+    }
+
+    const localTxs = txString?.split(",")
+    let runningTxs = []
+
+    for (let index = 0; index < localTxs.length; index++) {
+      const id = localTxs[index];
+      const t = await getTxStatus(id)
+      if (t?.status === 4) {
+        continue
+      }
+      tx(id).subscribe(s => updateTxStatus(s?.status, id))
+      runningTxs.push(id)
+    }
+
+    localStorage.setItem('txs', runningTxs.toString())
+    setTxs(runningTxs.map(t => ({ id: t })))
     setLoading(false)
+  }
+
+  const getTxStatus = async (txID) => {
+    const status = await send([
+      getTransactionStatus(txID),
+    ])
+      .then(decode);
+    return status
   }
 
   const addTx = (txID) => {
@@ -33,6 +62,8 @@ export default function TxProvider({ children }) {
     let transaction = {id: txID}
     setTxs(prev => [...prev, transaction])
     tx(txID).subscribe(s => updateTxStatus(s, transaction.id))
+
+    window.localStorage.setItem('txs', [...txs, transaction?.id].toString())
   }
 
   const updateTxStatus = (s, txID) => {
