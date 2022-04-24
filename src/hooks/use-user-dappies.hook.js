@@ -5,6 +5,7 @@ import { DEFAULT_DAPPIES } from '../config/dappies.config'
 import { mutate, query, tx } from '@onflow/fcl'
 import { LIST_USER_DAPPIES } from '../flow/list-user-dappies.script'
 import { MINT_DAPPY } from '../flow/mint-dappy.tx'
+import { useTxs } from '../providers/TxProvider'
 
 export default function useUserDappies(user, collection, getFUSDBalance) {
   const [state, dispatch] = useReducer(userDappyReducer, {
@@ -12,6 +13,8 @@ export default function useUserDappies(user, collection, getFUSDBalance) {
     error: false,
     data: []
   })
+
+  const { addTx, runningTxs } = useTxs()
 
   useEffect(() => {
     const fetchUserDappies = async () => {
@@ -42,6 +45,11 @@ export default function useUserDappies(user, collection, getFUSDBalance) {
       return;
     }
 
+    if (runningTxs) {
+      alert("there is unfinished transaction !")
+      return
+    }
+
     try {
       let res = await mutate({
         cadence: MINT_DAPPY,
@@ -51,6 +59,7 @@ export default function useUserDappies(user, collection, getFUSDBalance) {
           arg(amount, t.UFix64)
         ]
       })
+      addTx(res)
       await tx(res).onceSealed()
       await getFUSDBalance()
       await addDappy(templateID)
